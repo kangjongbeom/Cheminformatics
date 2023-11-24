@@ -117,16 +117,3 @@ def evaluate_classification(
 	recall = recall_score(y_list, pred_list)
 	f1 = 2.0 * precision * recall / (precision + recall)
 	return accuracy, auroc, precision, recall, f1, ece
-
-
-def evaluate_regression(
-		y_list,
-		pred_list,
-	):
-	y_list = torch.cat(y_list, dim=0).detach().cpu().numpy()
-	pred_list = torch.cat(pred_list, dim=0).detach().cpu().numpy()
-
-	mse = mean_squared_error(y_list, pred_list)
-	rmse = math.sqrt(mse)
-	r2 = r2_score(y_list, pred_list)
-	return mse, rmse, r2

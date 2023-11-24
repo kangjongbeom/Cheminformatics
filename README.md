@@ -1,2 +1,5 @@
 # Cheminformatics
-My personal project
+
+My personal project for QSAR
+
+- SMILES TO @@@

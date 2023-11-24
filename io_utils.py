@@ -95,9 +95,29 @@ def get_molecular_graph(smi):
 
     atom_feature_list = [get_atom_features(atom) for atom in atoms]
     atom_feature_list = torch.tensor(atom_feature_list, dtype= torch.float64)
+    graph.ndata['h'] = atom_feature_list
 
     bonds = mol.GetBonds()
     bond_feature_list= []
+    for bond in bonds:
+        bond_feature = get_bond_features(bond)
+
+        src = bond.GetBeginAtom().GetIdx()
+        dst = bond.GetEndAtom().GetIdx()
+
+        # for directional
+        graph.add_edges(src, dst)
+        bond_feature_list.append(bond_feature)
+
+        graph.add_edges(dst, src)
+        bond_feature_list.append(bond_feature)
+
+    bond_feature_list = torch.tensor(bond_feature_list, dtype=torch.float64)
+    graph.edata['e_ij'] = bond_feature_list
+    return graph
+
+
+
 
 
 
@@ -105,48 +125,7 @@ def get_molecular_graph(smi):
 
 # Test
 smi = 'C=O'
-mol = Chem.MolFromSmiles(smi)
-
-atoms = mol.GetAtoms()
-atom_features = []
-for atom in atoms:
-    atom_feature = get_atom_features(atom)
-    atom_features.append(atom_feature)
-# print(atom_features)
-
-bond_features = []
-bonds = mol.GetBonds()
-for bond in bonds:
-    bond_feature = get_bond_features(bond)
-    bond_features.append(bond_feature)
-# print(bond_features)
-
-graph = dgl.DGLGraph()
-num_atoms = len(atoms)
-graph.add_nodes(num_atoms)
-atom_features = torch.tensor(atom_features, dtype=torch.float64)
-# bond_features = torch.tensor(bond_features, dtype=torch.float64)
-graph.ndata['h'] = atom_features
-# graph['e_ij'] = bond_features
+graph = get_molecular_graph(smi)
 
 print(graph.ndata)
-# print(graph.edata)
-
-# # Check
-# train_set,valid_set,test_set = get_dataset('SARs')
-# train = MyDataset(splitted_set=train_set)
-# valid = MyDataset(splitted_set=valid_set)
-# test = MyDataset(splitted_set=test_set)
-
-# atom vocab을 직접 따내자!
-# atom_vocab = set()
-# for smi in train.smi_list:
-#     mol = Chem.MolFromSmiles(smi)
-#     atoms = [atom.GetSymbol() for atom in mol.GetAtoms()]
-#     atom_vocab.update(atoms)
-# for smi in valid.smi_list:
-#     mol = Chem.MolFromSmiles(smi)
-#     atoms = [atom.GetSymbol() for atom in mol.GetAtoms()]
-#     atom_vocab.update(atoms) # 생각보다 몇개 안나옴.. 걍 수작업 하는게 더 좋겠다.
-
-# {'Se', 'Co', 'Na', 'S', 'F', 'As', 'N', 'Cl', 'I', 'K', 'C', 'Br', 'Ca', 'Au', 'B', 'Hg', 'O', 'P'}
+print(graph.edata)

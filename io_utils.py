@@ -46,6 +46,7 @@ class MyDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx): # indexing possible
         return self.smi_list[idx], self.label_list[idx]
 
+
 ## Featarue Engineering
 ATOM_VOCAB = [
 	'C', 'N', 'O', 'S', 'F',
@@ -85,7 +86,7 @@ def get_bond_features(bond):
     ]
     return bond_features
 
-def get_molecular_graph(smi):
+def get_molecular_graph(smi): # graph features
     graph = dgl.DGLGraph()
     mol = Chem.MolFromSmiles(smi)
 
@@ -116,16 +117,34 @@ def get_molecular_graph(smi):
     graph.edata['e_ij'] = bond_feature_list
     return graph
 
+def my_collate_fn(batch): # for dataloader
+    graph_list = []
+    label_list = []
+    for item in batch:
+        smi = item[0]
+        label = item[1]
+        graph = get_molecular_graph(smi)
+        graph_list.append(graph)
+        label_list.append(label)
+    graph_list = dgl.batch(graph_list)
+    label_list = torch.tensor(label_list, dtype=torch.float64)
+    return graph_list, label_list
 
 
+def debugging():
+    data = HTS(name='SARSCoV2_Vitro_Touret')
 
+    split = data.get_split(
+        method='scaffold',
+        seed=seed
+    )
 
+    train_set = split['train']
+    valid_set = split['valid']
+    test_set = split['test']
 
+    smi, label = get_smi_label(train_set)
+    graph = get_molecular_graph(smi[0])
 
-
-# Test
-smi = 'C=O'
-graph = get_molecular_graph(smi)
-
-print(graph.ndata)
-print(graph.edata)
+if __name__ ==  '__main__':
+    debugging()

@@ -67,11 +67,11 @@ def one_of_k_encoding(x, vocab):
 	return list(map(lambda s: float(x==s), vocab))
 
 def get_atom_features(atom):
-    atom_feature = one_of_k_encoding(atom.GetSymbol(), ATOM_VOCAB)
-    atom_feature += one_of_k_encoding(atom.GetDegree(),[0,1,2,3,4])
-    atom_feature += one_of_k_encoding(atom.GetTotalNumHs(),[0,1,2,3,4])
-    atom_feature += one_of_k_encoding(atom.GetImplicitValence(),[0,1,2,3,4])
-    atom_feature += [atom.GetIsAromatic()]
+    atom_feature = one_of_k_encoding(atom.GetSymbol(), ATOM_VOCAB) # 41
+    atom_feature += one_of_k_encoding(atom.GetDegree(),[0,1,2,3,4,5]) # 6
+    atom_feature += one_of_k_encoding(atom.GetTotalNumHs(),[0,1,2,3,4]) # 5
+    atom_feature += one_of_k_encoding(atom.GetImplicitValence(),[0,1,2,3,4,5]) # 6
+    atom_feature += [atom.GetIsAromatic()] #1
     return atom_feature
 
 def get_bond_features(bond):

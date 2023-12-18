@@ -1,4 +1,4 @@
-# Cheminformatics
+# Graph based single pred
 
 - My personal QSAR Study *( github도 연습할겸 :/ )*
 
